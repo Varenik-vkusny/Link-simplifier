@@ -1,0 +1,109 @@
+import random, string
+from fastapi import APIRouter, Depends, status, Request, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from .. import models, schemas
+from .users import get_current_user
+from ..database import get_db
+
+
+router = APIRouter()
+
+
+async def get_short_code(length: int=6):
+
+    alphabet = string.ascii_letters + string.digits
+
+    short_code = "".join(random.choices(alphabet, k=length))
+    
+    return short_code
+
+
+@router.post('/links', status_code=status.HTTP_201_CREATED)
+async def create_short_link(original_link: schemas.LinkIn, request: Request, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+
+    db_original_link_result = await db.execute(select(models.Link).filter(models.Link.original_link == original_link, models.Link.owner_id == current_user.id))
+    db_original_link = db_original_link_result.scalar_one_or_none()
+
+    if db_original_link:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='У вас уже есть такая ссылка!'
+        )
+    
+    short_code = get_short_code()
+
+    existing_code_result = await db.execute(select(models.Link).where(models.Link.short_code == short_code))
+
+    existing_code = existing_code_result.scalar_one_or_none()
+
+    while existing_code:
+        short_code = get_short_code()
+        existing_code_result = await db.execute(select(models.Link).where(models.Link.short_code == short_code))
+        existing_code = existing_code_result.scalar_one_or_none()
+
+    base_url = request.base_url
+    short_link = f'{base_url}{short_code}'
+
+    new_link = models.Link(
+        original_link=original_link,
+        short_code=short_code,
+        short_link=short_link,
+        owner_id=current_user.id
+    )
+
+    db.add(new_link)
+    await db.commit()
+
+    return {'short_link': new_link.short_link}
+
+
+
+@router.get('/links', response_model=list[schemas.LinkOut], status_code=status.HTTP_200_OK)
+async def get_links(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+
+    db_links_result = await db.execute(select(models.Link).where(models.Link.owner_id == current_user.id))
+
+    db_links = db_links_result.scalars().all()
+
+    if not db_links:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='У вас пока нет ни одной ссылки, создайте новую!'
+        )
+    
+    return db_links
+
+
+
+@router.put('/links/{link_id}', response_model=schemas.LinkOut, status_code=status.HTTP_200_OK)
+async def update_link(link_id: int, update_data: schemas.LinkIn, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+
+    db_link_result = await db.execute(select(models.Link).where(models.Link.id == link_id))
+
+    db_link = db_link_result.scalar_one_or_none()
+
+    if not db_link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Нет ссылки с таким id!'
+        )
+    
+    if not db_link.owner_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Ссылка с таким id не ваша! Вы не можете ее редактировать!'
+        )
+    
+    update_link = update_data.model_dump(exclude_unset=True)
+
+    for key, value in update_link.items():
+        setattr(db_link, key, value)
+
+    await db.commit()
+
+    await db.refresh(db_link)
+
+    return db_link
+
+

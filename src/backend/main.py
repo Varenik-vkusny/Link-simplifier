@@ -1,7 +1,13 @@
 import logging
+import asyncio
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import async_engine, Base
+from .config import settings
+from .routers import users, links
+from src.tg_bot.routers import common_handlers, auth_handlers
+
+from aiogram import Bot, Dispatcher
 
 logging.basicConfig(level=logging.INFO)
 
@@ -9,15 +15,30 @@ async def db_init():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+
+bot = Bot(settings.bot_token)
+dp = Dispatcher()
+dp.include_router(common_handlers.router)
+dp.include_router(auth_handlers.router)
+
+
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     logging.info('Приложение запускается')
     await db_init()
+
+    logging.info('Запускаю бота...')
+    asyncio.create_task(dp.start_polling(bot))
+    logging.info('Бот запущен')
+
     yield
     logging.info('Приложение остановлено')
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(users.router)
+app.include_router(links.router)
 
 
 @app.post('/')

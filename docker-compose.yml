@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+
+    ports:
+      - '8000:8000'
+    
+    volumes:
+      - './data:/app/data'
+
+    env_file:
+      - .env
+
+    depends_on:
+      - db
+    
+  db:
+    image: postgres:17
+
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data/'
+
+    environment:
+      - POSTGRES_USER=Short
+      - POSTGRES_PASSWORD=Link
+      - POSTGRES_DB=sldb
+
+    ports:
+      - '5432:5432'
+
+volumes: 
+  postgres_data:

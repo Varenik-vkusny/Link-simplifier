@@ -91,7 +91,7 @@ async def update_link(link_id: int, update_data: schemas.LinkIn, db: AsyncSessio
     
     if not db_link.owner_id == current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail='Ссылка с таким id не ваша! Вы не можете ее редактировать!'
         )
     
@@ -107,3 +107,24 @@ async def update_link(link_id: int, update_data: schemas.LinkIn, db: AsyncSessio
     return db_link
 
 
+
+@router.delete('/links/{link_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_link(link_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+
+    db_link_result = await db.execute(select(models.Link).where(models.Link.id == link_id))
+
+    db_link = db_link_result.scalar_one_or_none()
+
+    if not db_link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Нет ссылки с таким id!'
+        )
+    if not db_link.owner_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Это не ваша ссылка, вы не можете ее удалить!'
+        )
+    
+    await db.delete(db_link)
+    await db.commit()

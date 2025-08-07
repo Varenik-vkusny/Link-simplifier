@@ -12,7 +12,7 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
 
-@router.post('/register', response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
+@router.post('/users/register', response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
 async def register(user: schemas.UserIn, db: AsyncSession=Depends(get_db)):
 
     db_user_result = await db.execute(select(models.User).where(models.User.username == user.username))
@@ -26,7 +26,7 @@ async def register(user: schemas.UserIn, db: AsyncSession=Depends(get_db)):
     
     password_hash = security.hash_password(user.password)
 
-    db_user = models.User(**user.model_dump(), password_hash=password_hash)
+    db_user = models.User(username=user.username, password_hash=password_hash)
 
     db.add(db_user)
     await db.commit()
@@ -37,7 +37,7 @@ async def register(user: schemas.UserIn, db: AsyncSession=Depends(get_db)):
 
 
 @router.post('/token', response_model=schemas.Token, status_code=status.HTTP_200_OK)
-async def auth(user: schemas.UserIn, db: AsyncSession = Depends(get_db)):
+async def auth(user: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
 
     db_user_result = await db.execute(select(models.User).where(models.User.username == user.username))
     
@@ -45,7 +45,8 @@ async def auth(user: schemas.UserIn, db: AsyncSession = Depends(get_db)):
 
     authorization_exception = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail='Неправильное имя или пароль!'
+        detail='Неправильное имя или пароль!',
+        headers={'WWW-Authenticate': 'Bearer'}
     )
 
     if not db_user:
@@ -54,7 +55,7 @@ async def auth(user: schemas.UserIn, db: AsyncSession = Depends(get_db)):
         raise authorization_exception
     
 
-    user_data = {'sub': user.username}
+    user_data = {'sub': db_user.username}
 
     access_token = security.create_access_token(data=user_data)
 
@@ -69,7 +70,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Вы не авторизованы!'
+        detail='Вы не авторизованы!',
+        headers={'WWW-Authenticate': 'Bearer'}
     )
 
     try:

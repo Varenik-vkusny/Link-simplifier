@@ -11,10 +11,6 @@ from aiogram import Bot, Dispatcher
 
 logging.basicConfig(level=logging.INFO)
 
-async def db_init():
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
 
 bot = Bot(settings.bot_token)
 dp = Dispatcher()
@@ -26,7 +22,6 @@ dp.include_router(links_handlers.router)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info('Приложение запускается')
-    await db_init()
 
     logging.info('Запускаю бота...')
     asyncio.create_task(dp.start_polling(bot))

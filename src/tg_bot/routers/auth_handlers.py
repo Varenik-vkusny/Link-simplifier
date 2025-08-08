@@ -1,6 +1,5 @@
 import httpx
 from aiogram import Router, F
-from aiogram.filters import CommandStart
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram import types
@@ -71,7 +70,7 @@ async def register_password_handler(message: types.Message, state: FSMContext):
         except httpx.RequestError:
             await message.answer('Ошибка при подключении к серверу!')
             await state.clear()
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPError:
             error_detail = response.json().get('detail', 'Неизвестная ошибка')
             await message.answer(error_detail)
             await state.clear()
@@ -127,7 +126,7 @@ async def auth_password_handler(message: types.Message, state: FSMContext):
         except httpx.RequestError:
             await message.answer('Ошибка при подключении к серверу!')
             await state.clear()
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPError:
             error_detail = response.json().get('detail', 'Неизвестная ошибка')
             await message.answer(error_detail)
             await state.clear()

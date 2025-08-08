@@ -10,7 +10,7 @@ from ..database import get_db
 router = APIRouter()
 
 
-async def get_short_code(length: int=6):
+def get_short_code(length: int=6):
 
     alphabet = string.ascii_letters + string.digits
 
@@ -20,9 +20,9 @@ async def get_short_code(length: int=6):
 
 
 @router.post('/links', status_code=status.HTTP_201_CREATED)
-async def create_short_link(original_link: schemas.LinkIn, request: Request, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def create_short_link(link_data: schemas.LinkIn, request: Request, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
-    db_original_link_result = await db.execute(select(models.Link).filter(models.Link.original_link == original_link, models.Link.owner_id == current_user.id))
+    db_original_link_result = await db.execute(select(models.Link).filter(models.Link.original_link == link_data.original_link, models.Link.owner_id == current_user.id))
     db_original_link = db_original_link_result.scalar_one_or_none()
 
     if db_original_link:
@@ -42,11 +42,11 @@ async def create_short_link(original_link: schemas.LinkIn, request: Request, db:
         existing_code_result = await db.execute(select(models.Link).where(models.Link.short_code == short_code))
         existing_code = existing_code_result.scalar_one_or_none()
 
-    base_url = request.base_url
+    base_url = 'http://localhost:8000/'
     short_link = f'{base_url}{short_code}'
 
     new_link = models.Link(
-        original_link=original_link,
+        original_link=link_data.original_link,
         short_code=short_code,
         short_link=short_link,
         owner_id=current_user.id

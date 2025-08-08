@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import async_engine, Base
 from .config import settings
-from .routers import users, links
-from src.tg_bot.routers import common_handlers, auth_handlers
+from .routers import users, links, redirect
+from src.tg_bot.routers import common_handlers, auth_handlers, links_handlers
 
 from aiogram import Bot, Dispatcher
 
@@ -20,6 +20,7 @@ bot = Bot(settings.bot_token)
 dp = Dispatcher()
 dp.include_router(common_handlers.router)
 dp.include_router(auth_handlers.router)
+dp.include_router(links_handlers.router)
 
 
 @asynccontextmanager
@@ -39,6 +40,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(users.router)
 app.include_router(links.router)
+app.include_router(redirect.router)
 
 
 @app.post('/')

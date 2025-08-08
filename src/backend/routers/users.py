@@ -82,7 +82,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         if not username: 
             raise credential_exception
         
-        token_data = schemas.TokenData(username)
+        token_data = schemas.TokenData(username=username)
     except JWTError: 
         raise credential_exception
     

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
-from datetime import date
+from datetime import datetime
 
 
 class UserIn(BaseModel):
@@ -23,7 +23,7 @@ class LinkOut(BaseModel):
     id: int
     original_link: str
     short_link: str
-    created_at: date
+    created_at: datetime
     owner: UserOut
 
     model_config = ConfigDict(from_attributes=True)

@@ -13,10 +13,6 @@ main_kb = ReplyKeyboardMarkup(
         [
             KeyboardButton(text='Получить короткую ссылку'),
             KeyboardButton(text='Мои ссылки')
-        ],
-        [
-            KeyboardButton(text='Изменить ссылку'),
-            KeyboardButton(text='Удалить ссылку')
         ]
     ]
 )

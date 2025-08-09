@@ -44,7 +44,7 @@ async def auth(user: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = D
     db_user = db_user_result.scalar_one_or_none()
 
     authorization_exception = HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Неправильное имя или пароль!',
         headers={'WWW-Authenticate': 'Bearer'}
     )

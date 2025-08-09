@@ -20,7 +20,7 @@ def get_short_code(length: int=6):
 
 
 @router.post('/links', status_code=status.HTTP_201_CREATED)
-async def create_short_link(link_data: schemas.LinkIn, request: Request, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def create_short_link(link_data: schemas.LinkIn, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
     db_original_link_result = await db.execute(select(models.Link).filter(models.Link.original_link == link_data.original_link, models.Link.owner_id == current_user.id))
     db_original_link = db_original_link_result.scalar_one_or_none()
@@ -55,7 +55,7 @@ async def create_short_link(link_data: schemas.LinkIn, request: Request, db: Asy
     db.add(new_link)
     await db.commit()
 
-    return {'short_link': new_link.short_link}
+    return {'id': new_link.id, 'short_link': new_link.short_link}
 
 
 

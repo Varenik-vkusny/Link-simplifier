@@ -2,7 +2,6 @@ import logging
 import asyncio
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .database import async_engine, Base
 from .config import settings
 from .routers import users, links, redirect
 from src.tg_bot.routers import common_handlers, auth_handlers, links_handlers

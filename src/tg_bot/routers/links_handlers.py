@@ -95,7 +95,8 @@ async def get_links(message: types.Message):
             for link in links:
                 await message.answer(f'{link['id']}) Оригинальная ссылка: {link['original_link']}\n'
                                      f'Упрощенная ссылка: {link['short_link']}\n\n'
-                                     f'{link['owner']['username']} | {link['created_at']}', reply_markup=get_inline_kb(link['id']))
+                                     f'{link['owner']['username']} | {link['created_at']}\n'
+                                     f'Кликнули: {link['click_count']} раз', reply_markup=get_inline_kb(link['id']))
         
         except httpx.RequestError:
             await message.answer('Ошибка при подключении к серверу!')

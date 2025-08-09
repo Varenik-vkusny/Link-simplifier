@@ -1,6 +1,5 @@
-from sqlalchemy import String, Integer, Boolean, Column, DateTime, ForeignKey
+from sqlalchemy import String, Integer, Column, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from .database import Base
 
 class User(Base):
@@ -19,8 +18,8 @@ class Link(Base):
     id = Column(Integer, primary_key=True, index=True)
     original_link = Column(String, index=True)
     short_code = Column(String, index=True)
-    short_link = Column(String, unique=True , index=True)
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, server_default=func.now())
+    click_count = Column(Integer, default=0, nullable=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
 
     owner = relationship('User', back_populates='link')

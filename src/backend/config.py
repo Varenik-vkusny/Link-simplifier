@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
     bot_token: str
     api_base_url: str
+    base_url: str
 
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 

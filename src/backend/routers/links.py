@@ -1,10 +1,11 @@
-import random, string
+import random, string, json
 from fastapi import APIRouter, Depends, status, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from .. import models, schemas
 from .users import get_current_user
 from ..database import get_db
+from ..client import redis_client
 
 
 router = APIRouter()
@@ -58,6 +59,17 @@ async def create_short_link(link_data: schemas.LinkIn, db: AsyncSession = Depend
 @router.get('/links', response_model=list[schemas.LinkOut], status_code=status.HTTP_200_OK)
 async def get_links(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
+    cache_key = current_user.id
+
+    cache_links = await redis_client.get(cache_key)
+
+    if cache_links:
+        print(f'CACHE HIT to ID №{current_user.id}')
+
+        return json.loads(cache_links)
+    
+    print('CACHE MISS')
+
     db_links_result = await db.execute(select(models.Link).where(models.Link.owner_id == current_user.id))
 
     db_links = db_links_result.scalars().all()
@@ -68,7 +80,14 @@ async def get_links(db: AsyncSession = Depends(get_db), current_user = Depends(g
             detail='У вас пока нет ни одной ссылки, создайте новую!'
         )
     
-    return db_links
+    pydantic_links = [schemas.LinkOut.model_validate(lk) for lk in db_links]
+    
+    lk_to_redis = [lk.model_dump_json() for lk in pydantic_links]
+
+    final_string = f"[{','.join(lk_to_redis)}]"
+    await redis_client.set(cache_key, final_string, ex=600)
+    
+    return pydantic_links
 
 
 

@@ -28,5 +28,14 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: redis:8-alpine
+
+    ports:
+      - '6379:6379'
+    
+    env_file:
+      - .env
+
 volumes: 
   postgres_data:

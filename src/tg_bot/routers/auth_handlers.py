@@ -3,7 +3,9 @@ from aiogram import Router, F
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram import types
-from src.backend.config import settings
+from src.backend.config import get_settings
+
+settings = get_settings()
 
 users_with_token = {}
 

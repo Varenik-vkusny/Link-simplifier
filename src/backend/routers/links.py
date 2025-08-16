@@ -1,11 +1,12 @@
 import random, string, json
-from fastapi import APIRouter, Depends, status, Request, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from redis.asyncio import Redis
 from .. import models, schemas
 from .users import get_current_user
 from ..database import get_db
-from ..client import redis_client
+from ..client import get_redis_client
 
 
 router = APIRouter()
@@ -21,7 +22,7 @@ def get_short_code(length: int=6):
 
 
 @router.post('/links', response_model=schemas.LinkOut, status_code=status.HTTP_201_CREATED)
-async def create_short_link(link_data: schemas.LinkIn, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def create_short_link(link_data: schemas.LinkIn, redis_client: Redis = Depends(get_redis_client), db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
     db_original_link_result = await db.execute(select(models.Link).filter(models.Link.original_link == link_data.original_link, models.Link.owner_id == current_user.id))
     db_original_link = db_original_link_result.scalar_one_or_none()
@@ -52,12 +53,14 @@ async def create_short_link(link_data: schemas.LinkIn, db: AsyncSession = Depend
     db.add(new_link)
     await db.commit()
 
+    await redis_client.delete(current_user.id)
+
     return new_link
 
 
 
 @router.get('/links', response_model=list[schemas.LinkOut], status_code=status.HTTP_200_OK)
-async def get_links(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def get_links(db: AsyncSession = Depends(get_db), redis_client: Redis = Depends(get_redis_client), current_user = Depends(get_current_user)):
 
     cache_key = current_user.id
 
@@ -92,7 +95,7 @@ async def get_links(db: AsyncSession = Depends(get_db), current_user = Depends(g
 
 
 @router.put('/links/{link_id}', response_model=schemas.LinkOut, status_code=status.HTTP_200_OK)
-async def update_link(link_id: int, update_data: schemas.LinkIn, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def update_link(link_id: int, update_data: schemas.LinkIn, redis_client: Redis = Depends(get_redis_client), db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
     db_link_result = await db.execute(select(models.Link).where(models.Link.id == link_id))
 
@@ -119,12 +122,14 @@ async def update_link(link_id: int, update_data: schemas.LinkIn, db: AsyncSessio
 
     await db.refresh(db_link)
 
+    await redis_client.delete(current_user.id)
+
     return db_link
 
 
 
 @router.delete('/links/{link_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_link(link_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def delete_link(link_id: int, redis_client: Redis = Depends(get_redis_client), db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
 
     db_link_result = await db.execute(select(models.Link).where(models.Link.id == link_id))
 
@@ -143,3 +148,5 @@ async def delete_link(link_id: int, db: AsyncSession = Depends(get_db), current_
     
     await db.delete(db_link)
     await db.commit()
+
+    await redis_client.delete(current_user.id)

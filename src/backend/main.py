@@ -2,11 +2,14 @@ import logging
 import asyncio
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .config import settings
+from .config import get_settings
 from .routers import users, links, redirect
 from src.tg_bot.routers import common_handlers, auth_handlers, links_handlers
 
 from aiogram import Bot, Dispatcher
+
+settings = get_settings()
+
 
 logging.basicConfig(level=logging.INFO)
 

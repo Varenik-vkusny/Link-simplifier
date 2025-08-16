@@ -3,9 +3,14 @@ from httpx import AsyncClient, ASGITransport
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+import redis.asyncio as redis
 from src.backend.main import app
 from src.backend.database import get_db, Base
 from src.backend import models
+from src.backend.config import get_test_settings, get_settings
+
+
+app.dependency_overrides[get_settings] = get_test_settings
 
 
 TEST_DATABASE_URL = 'sqlite+aiosqlite:///:memory:'
@@ -26,6 +31,11 @@ def anyio_backend():
 async def prepare_database():
     async with test_async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    test_settings = get_test_settings()
+    redis_client = redis.from_url(test_settings.redis_url)
+    await redis_client.flushdb()
+    await redis_client.aclose()
     
     yield
 

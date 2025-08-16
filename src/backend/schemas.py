@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict, computed_field
 from typing import Optional
 from datetime import datetime
-from .config import settings
+from .config import get_settings
+
+settings = get_settings()
 
 
 class UserIn(BaseModel):

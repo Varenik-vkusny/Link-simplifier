@@ -4,8 +4,10 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types
-from src.backend.config import settings
+from src.backend.config import get_settings
 from .auth_handlers import users_with_token
+
+settings = get_settings()
 
 
 def get_inline_kb(link_id):

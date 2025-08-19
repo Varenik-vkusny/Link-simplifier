@@ -13,6 +13,16 @@ services:
 
     depends_on:
       - db
+
+  bot:
+    build: .
+    command: ['python', '-m', 'src.tg_bot.main_bot']
+
+    env_file:
+      - .env
+
+    depends_on:
+      - db
     
   db:
     image: postgres:17

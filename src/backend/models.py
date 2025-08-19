@@ -7,7 +7,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, index=True)
-    password_hash = Column(String, index=True)
+    password_hash = Column(String)
 
     link = relationship('Link', back_populates='owner')
 
@@ -16,7 +16,7 @@ class Link(Base):
     __tablename__ = 'links'
 
     id = Column(Integer, primary_key=True, index=True)
-    original_link = Column(String, index=True)
+    original_link = Column(String)
     short_code = Column(String, index=True)
     created_at = Column(DateTime, server_default=func.now())
     click_count = Column(Integer, default=0, nullable=False)

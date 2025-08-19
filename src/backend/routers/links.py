@@ -1,5 +1,6 @@
 import random, string, json
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from redis.asyncio import Redis
@@ -53,7 +54,7 @@ async def create_short_link(link_data: schemas.LinkIn, redis_client: Redis = Dep
     db.add(new_link)
     await db.commit()
 
-    await redis_client.delete(current_user.id)
+    await redis_client.delete(str(current_user.id))
 
     return new_link
 
@@ -62,7 +63,7 @@ async def create_short_link(link_data: schemas.LinkIn, redis_client: Redis = Dep
 @router.get('/links', response_model=list[schemas.LinkOut], status_code=status.HTTP_200_OK)
 async def get_links(db: AsyncSession = Depends(get_db), redis_client: Redis = Depends(get_redis_client), current_user = Depends(get_current_user)):
 
-    cache_key = current_user.id
+    cache_key = str(current_user.id)
 
     cache_links = await redis_client.get(cache_key)
 
@@ -85,10 +86,10 @@ async def get_links(db: AsyncSession = Depends(get_db), redis_client: Redis = De
     
     pydantic_links = [schemas.LinkOut.model_validate(lk) for lk in db_links]
     
-    lk_to_redis = [lk.model_dump_json() for lk in pydantic_links]
+    
+    lk_to_redis = jsonable_encoder(pydantic_links)
 
-    final_string = f"[{','.join(lk_to_redis)}]"
-    await redis_client.set(cache_key, final_string, ex=600)
+    await redis_client.set(str(cache_key), json.dumps(lk_to_redis), ex=600)
     
     return pydantic_links
 
@@ -122,7 +123,7 @@ async def update_link(link_id: int, update_data: schemas.LinkIn, redis_client: R
 
     await db.refresh(db_link)
 
-    await redis_client.delete(current_user.id)
+    await redis_client.delete(str(current_user.id))
 
     return db_link
 
@@ -149,4 +150,4 @@ async def delete_link(link_id: int, redis_client: Redis = Depends(get_redis_clie
     await db.delete(db_link)
     await db.commit()
 
-    await redis_client.delete(current_user.id)
+    await redis_client.delete(str(current_user.id))

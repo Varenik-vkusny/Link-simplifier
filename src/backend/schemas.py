@@ -26,7 +26,7 @@ class LinkOut(BaseModel):
     id: int
     original_link: str
     short_code: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
     owner: UserOut
     click_count: int
 

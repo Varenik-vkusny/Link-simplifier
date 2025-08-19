@@ -8,6 +8,7 @@ from src.backend.main import app
 from src.backend.routers.users import get_current_user
 from src.backend.client import get_redis_client
 from src.backend.config import get_test_settings
+from src.backend.database import get_db
 
 @pytest.fixture(autouse=True)
 def patch_settings(monkeypatch):
@@ -44,3 +45,35 @@ async def test_redis_hit(client: AsyncClient):
 
     assert response.status_code == 200
     assert response.json() == jsonable_encoder(fake_data)
+
+
+@pytest.mark.anyio
+async def test_redis_cache_miss(client: AsyncClient):
+
+    test_redis = AsyncMock()
+    test_db = AsyncMock()
+
+    fake_data = [
+        models.Link(
+        id=36, original_link='https://some_url', short_code='t2', click_count=0, owner_id=35, owner=models.User(id=35, username='FakeUser')
+        )
+    ]
+
+    test_redis.get.return_value = None
+
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = fake_data
+
+    test_db.execute.return_value = mock_result
+
+    app.dependency_overrides[get_current_user] = override_current_user
+    app.dependency_overrides[get_redis_client] = lambda: test_redis
+    app.dependency_overrides[get_db] = lambda: test_db
+
+    response = await client.get('/links')
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+    test_redis.get.assert_awaited_once()
+    test_db.execute.assert_awaited_once()

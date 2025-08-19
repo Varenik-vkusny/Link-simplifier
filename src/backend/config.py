@@ -29,5 +29,5 @@ def get_test_settings():
         access_token_expire_minutes=30,
         bot_token="fake_bot_token",
         api_base_url="http://test",
-        base_url="http://test"
+        base_url="http://test/"
     )

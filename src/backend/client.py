@@ -1,9 +1,12 @@
 import redis.asyncio as redis
-from fastapi import Depends
-from .config import Settings
-from .config import get_settings
+
+redis_client: redis.Redis | None=None
 
 
-def get_redis_client(settings: Settings = Depends(get_settings)):
+def get_redis_client() -> redis.Redis:
 
-    return redis.from_url(settings.redis_url, encoding='utf-8', decode_responses=True)
+    if redis_client is None:
+
+        raise RuntimeError('Redis client is not initializied')
+
+    return redis_client

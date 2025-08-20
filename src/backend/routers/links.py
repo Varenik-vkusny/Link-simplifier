@@ -54,6 +54,8 @@ async def create_short_link(link_data: schemas.LinkIn, redis_client: Redis = Dep
     db.add(new_link)
     await db.commit()
 
+    await redis_client.set(f'redirect:{short_code}', link_data.original_link)
+
     await redis_client.delete(str(current_user.id))
 
     return new_link
@@ -151,3 +153,4 @@ async def delete_link(link_id: int, redis_client: Redis = Depends(get_redis_clie
     await db.commit()
 
     await redis_client.delete(str(current_user.id))
+    await redis_client.delete(f'redirect:{db_link.short_code}')

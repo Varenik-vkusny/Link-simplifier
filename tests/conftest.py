@@ -8,6 +8,7 @@ from src.backend.main import app
 from src.backend.database import get_db, Base
 from src.backend import models
 from src.backend.config import get_test_settings, get_settings
+from src.backend.client import get_redis_client
 
 
 app.dependency_overrides[get_settings] = get_test_settings
@@ -25,6 +26,16 @@ TestAsyncLocalSession = sessionmaker(bind=test_async_engine, class_=AsyncSession
 @pytest.fixture(scope='session')
 def anyio_backend():
     return 'asyncio'
+
+
+
+async def override_redis():
+
+    test_settings = get_test_settings()
+    redis_client = redis.from_url(test_settings.redis_url, encoding='utf-8', decode_responses=True)
+    return redis_client
+
+app.dependency_overrides[get_redis_client] = override_redis
 
 
 @pytest.fixture(autouse=True, scope='function')

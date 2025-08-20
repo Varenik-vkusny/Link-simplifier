@@ -1,5 +1,7 @@
 # ✒️ Link Simplifier
 
+[![Run Python Tests](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml)
+
 A modern web application for URL shortening, featuring a backend built with the high-performance FastAPI framework and a user-friendly Telegram bot client powered by aiogram 3.
 
 ---

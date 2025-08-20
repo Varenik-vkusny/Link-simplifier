@@ -54,6 +54,13 @@ async def prepare_database():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+@pytest.fixture(autouse=True, scope='function')
+def patch_settings(monkeypatch):
+
+    test_settings = get_test_settings()
+    monkeypatch.setattr('src.backend.schemas.settings', test_settings)
+
+
 @pytest.fixture(scope='function')
 async def client() -> AsyncGenerator[AsyncClient, None]:
 

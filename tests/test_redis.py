@@ -10,12 +10,6 @@ from src.backend.client import get_redis_client
 from src.backend.config import get_test_settings
 from src.backend.database import get_db
 
-@pytest.fixture(autouse=True)
-def patch_settings(monkeypatch):
-
-    test_settings = get_test_settings()
-    monkeypatch.setattr('src.backend.schemas.settings', test_settings)
-
 
 fake_user = models.User(id=35, username='FakeUser')
 

@@ -3,6 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.backend import models
 from .conftest import user
+from src.backend.config import get_test_settings
 
 
 @pytest.mark.anyio
@@ -16,9 +17,11 @@ async def test_create_short_link(authenticated_client: AsyncClient, db_session: 
 
     assert response.status_code == 201
 
+    test_settings = get_test_settings()
+
     data = response.json()
     assert 'short_link' in data
-    assert data['short_link'].startswith('http://localhost:8000/')
+    assert data['short_link'].startswith(test_settings.base_url)
 
     db_link = await db_session.get(models.Link, data['id'])
     assert db_link

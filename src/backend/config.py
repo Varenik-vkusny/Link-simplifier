@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
@@ -20,9 +21,11 @@ def get_settings():
 
 
 def get_test_settings():
+
+    redis_host = os.getenv('TEST_REDIS_HOST', 'localhost')
     return Settings(
         database_url="sqlite+aiosqlite:///:memory:",
-        redis_url="redis://localhost:6379/1",
+        redis_url=f"redis://{redis_host}:6379/1",
         algorithm="HS256",
         secret_key="test_secret_key_for_jwt_tokens",
         access_token_expire_minutes=30,

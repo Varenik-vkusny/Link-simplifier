@@ -1,3 +1,6 @@
+[Читать на русском](README_RU.md)
+---
+
 # ✒️ Link Simplifier
 
 [![Run Python Tests](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml)

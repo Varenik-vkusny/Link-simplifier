@@ -3,6 +3,8 @@
 
 # ✒️ Упроститель ссылки
 
+[![Run Python Tests](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml)
+
 Современное веб приложение с бэкендом на современном фреймворке FastAPI и клиентской частью в виде тг бота (aiogram 3) с дружественным интерфейсом.
 
 ---

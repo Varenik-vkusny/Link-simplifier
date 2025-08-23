@@ -1,81 +1,60 @@
 [Читать на русском](README_RU.md)
 ---
 
-# ✒️ Link Simplifier
+# ✒️ Link Simplifier: A High-Performance URL Shortener Service
 
 [![Run Python Tests](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml/badge.svg)](https://github.com/Varenik-vkusny/Link-simplifier/actions/workflows/ci.yml)
 
-A modern web application for URL shortening, featuring a backend built with the high-performance FastAPI framework and a user-friendly Telegram bot client powered by aiogram 3.
+An asynchronous web application built with FastAPI, featuring a hybrid storage architecture (PostgreSQL + Redis) to ensure instantaneous redirects. A Telegram bot built with Aiogram 3 serves as the client interface.
 
 ---
 
-## 🚀 About The Project
+## 🚀 Architecture & Technology
 
-This project is a convenient tool for creating short URLs. It consists of two main parts:
+This project demonstrates the development of a high-performance and resilient web service using modern backend engineering practices.
 
-*   **FastAPI REST API:** A high-speed backend that handles all business logic, manages data in a PostgreSQL database, and ensures secure JWT-based authentication.
-*   **Telegram Bot (aiogram 3):** An interactive and friendly client for interacting with the service through the familiar Telegram interface.
+*   **FastAPI API:** An asynchronous REST API for managing users and links.
+*   **Hybrid Storage:**
+    *   **PostgreSQL:** Serves as the reliable, long-term "Source of Truth" for user data and complete link information.
+    *   **Redis:** Acts as the primary **operational data store** for "short_code -> original_url" pairs, enabling redirects in microseconds. It is also used for **atomic click counting** and **caching** user link lists.
+*   **Background Task (APScheduler):** Periodically synchronizes click counts from Redis to the main PostgreSQL database.
+*   **Aiogram 3 Telegram Bot:** A full-featured client for interacting with the API.
 
-This project showcases a full cycle of modern backend development: from API design and database management to testing, migration setup, and containerization with Docker.
+### 🛠️ Tech Stack
 
----
-
-## 🛠️ Tech Stack
-
-*   **Backend:**
-    *   ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python)
-    *   ![FastAPI](https://img.shields.io/badge/FastAPI-0.11x-009688?style=for-the-badge&logo=fastapi)
-    *   ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-DB4437?style=for-the-badge&logo=sqlalchemy)
-    *   ![Pydantic](https://img.shields.io/badge/Pydantic-v2-E96F00?style=for-the-badge)
-*   **Telegram Bot:**
-    *   ![aiogram](https://img.shields.io/badge/aiogram-3.x-26A5E4?style=for-the-badge)
-    *   ![httpx](https://img.shields.io/badge/httpx-async-000000?style=for-the-badge)
-*   **Database & Migrations:**
-    *   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql)
-    *   ![Alembic](https://img.shields.io/badge/Alembic-migrations-4E2A84?style=for-the-badge)
-*   **Authentication & Tooling:**
-    *   `python-jose` (JWT Tokens)
-    *   `passlib` & `bcrypt` (Password Hashing)
-    *   `Uvicorn` (ASGI Server)
-    *   `python-dotenv` (Environment Variables)
-*   **Containerization & Testing:**
-    *   ![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=for-the-badge&logo=docker)
-    *   ![Pytest](https://img.shields.io/badge/Pytest-testing-0A9EDC?style=for-the-badge&logo=pytest)
+*   **Backend:** Python 3.12, **FastAPI**, **SQLAlchemy 2.0 (async)**, Pydantic V2, Alembic
+*   **Databases:** **PostgreSQL**, **Redis**
+*   **Authentication:** **JWT** (python-jose), **OAuth2**, passlib[bcrypt]
+*   **Infrastructure & DevOps:** **Docker**, **Docker Compose**, **CI/CD (GitHub Actions)**
+*   **Testing:** **Pytest**, pytest-mock, httpx
 
 ---
 
 ## ✨ Key Features
 
-*   **Authentication & Authorization:**
-    *   🔐 User registration and login via username/password.
-    *   🛡️ Secure password storage using hashing (bcrypt).
-    *   🔑 JWT-based authentication system (OAuth2 standard).
-*   **Link Management:**
-    *   ✍️ Full CRUD operations for links (Create, Read, Update, Delete).
-    *   🔄 Automatic redirection from short links to the original URL.
-    *   📈 Tracking of click counts for each link.
-*   **Telegram Bot as a Client:**
-    *   🔑 Account management (registration, login) via interactive buttons.
-    *   🤖 Intuitive link management using inline keyboard buttons.
-    *   💬 Easy navigation with a persistent Reply Keyboard.
-    *   🧠 Finite State Machine (FSM) for handling multi-step user dialogues.
-*   **Code Quality & Infrastructure:**
-    *   📄 Automatically generated interactive API documentation (Swagger UI, ReDoc).
-    *   🐋 The entire application and its database are containerized with Docker.
-    *   🧪 Integration tests for critical API endpoints covering security and data management.
-    *   🔄 Database schema versioning managed by Alembic migrations.
+*   **High Performance:**
+    *   **Redis-First Architecture for Redirects:** Redirect requests are handled directly by Redis without touching the primary database, ensuring minimal latency.
+    *   **Asynchronous Click Counting:** Utilizes Redis's atomic `INCR` operation to prevent blocking the main thread.
+    *   **API Response Caching:** User link lists are cached to reduce the load on PostgreSQL.
+*   **Reliability & Code Quality:**
+    *   **Comprehensive Test Coverage:** E2E tests for all API endpoints and Unit tests for business logic, including dependency mocking.
+    *   **Isolated Test Environment:** Pytest is configured to work with an in-memory SQLite database and a separate test Redis database.
+    *   **Automated Quality Assurance:** A CI pipeline on GitHub Actions runs tests on every commit.
+    *   **Secure Authentication:** Implementation of the OAuth2 standard with JWTs to protect endpoints.
+*   **Thoughtful Architecture:**
+    *   **Resource Management via `lifespan`:** Proper initialization and closing of the Redis connection pool.
+    *   **Cache Invalidation:** Automatic clearing of a user's cache upon link creation, update, or deletion.
+    *   **DB Migrations:** Safe PostgreSQL schema management with Alembic.
 
 ---
 
-## 🏁 Getting Started (via Docker)
-
-This is the recommended and easiest way to run the project.
+## 🏁 Getting Started
 
 ### Prerequisites
-*   [Docker](https://www.docker.com/products/docker-desktop/) installed.
-*   A Telegram Bot Token from [@BotFather](https://t.me/BotFather).
+*   Docker
+*   Docker Compose
 
-### Installation and Launch
+### Installation & Launch
 
 1.  **Clone the repository:**
     ```bash
@@ -83,34 +62,47 @@ This is the recommended and easiest way to run the project.
     cd Link-simplifier
     ```
 
-2.  **Create the `.env` file:**
-    *   Create a copy of the `.env.example` file and name it `.env`.
-    *   Open the new `.env` file and paste your Telegram Bot Token into the `BOT_TOKEN` variable.
-    *   (Optional) You can also generate your own `SECRET_KEY` for added security.
+2.  **Set up environment variables:**
+    *   Copy `.env.example` to `.env`.
+    *   Fill in `BOT_TOKEN`, `SECRET_KEY`, and other required variables.
 
-3.  **Build and run the containers:**
-    Execute a single command to build the image and start all services:
+3.  **Run the application:**
     ```bash
-    docker-compose up --build -d
+    docker-compose up --build
     ```
-    *   `--build`: Forces a rebuild of the image if there are changes in your code.
-    *   `-d`: Runs the containers in detached (background) mode.
 
-4.  **Apply the database migrations:**
-    Once the containers are running, execute this command to create the necessary tables in the database:
+4.  **Apply migrations (in a separate terminal):**
+    *   Wait for the containers to start up, then execute:
     ```bash
     docker-compose exec web alembic upgrade head
     ```
-    *   `docker-compose exec web`: Executes a command inside the running `web` container.
-    *   `alembic upgrade head`: Applies the latest database migrations.
+5.  **Done!**
+    *   The API is available at `http://localhost:8000`
+    *   Interactive API documentation: `http://localhost:8000/docs`
+    *   Your Telegram bot is now running and ready to use.
 
-5.  **Done! Your application is now running!**
+---
 
-*   The API is available at `http://localhost:8000`.
-*   Interactive API documentation is at `http://localhost:8000/docs`.
-*   Your Telegram bot is up and ready to use!
+### Running Tests
 
-### Stopping the application
-To stop all running containers, use the following command:
+A running Redis container is required to run the E2E tests.
+
+1.  **Start Redis in detached mode:**
+    ```bash
+    docker-compose up -d redis
+    ```
+2.  **Install dependencies and run tests:**
+    ```bash
+    # (Activate your virtual environment)
+    pip install -r requirements.txt
+    pytest
+    ```
+3.  **Stop Redis after testing:**
+    ```bash
+    docker-compose down
+    ```
+
+---
+### Stopping the Application
 ```bash
 docker-compose down

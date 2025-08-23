@@ -30,10 +30,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-    environment:
-      - POSTGRES_USER=Short
-      - POSTGRES_PASSWORD=Link
-      - POSTGRES_DB=sldb
+    env_file:
+      - .env.db
 
     ports:
       - "5432:5432"

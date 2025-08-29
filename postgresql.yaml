@@ -31,30 +31,24 @@ spec:
         - name: postgres-mount
           mountPath: /var/lib/postgresql/data
 
-        envFrom:
-
-        - configMapRef:
-            name: app-config
-
         env:
         - name: POSTGRES_USER
           valueFrom: 
             secretKeyRef:
               name: app-secrets
-
-              key: POSTGRES_USER
-        
-        - name: POSTGRES_DB
-          valueFrom: 
-            configMapKeyRef:
-              name: app-config
-              key: DB_NAME
+              key: DB_USER
         
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: app-secrets
-              key: POSTGRES_PASSWORD
+              key: DB_PASSWORD
+
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_NAME 
 
         - name: SECRET_KEY
           valueFrom:

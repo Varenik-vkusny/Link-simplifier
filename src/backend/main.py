@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     client.redis_client = redis.from_url(settings.redis_url, encoding='utf-8', decode_responses=True)
     logging.info('Redis client запущен')
 
-    scheduler.add_job(sync_redis_clicks_to_db, trigger='interval', minutes=2)
+    scheduler.add_job(sync_redis_clicks_to_db, trigger='interval', hours=1)
     scheduler.start()
     logging.info('Планировщик запущен')
 

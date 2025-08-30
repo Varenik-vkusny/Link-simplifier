@@ -50,12 +50,6 @@ spec:
               name: app-config
               key: DB_NAME 
 
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: SECRET_KEY
-
   volumeClaimTemplates:
   - metadata:
       name: postgres-mount

@@ -16,4 +16,3 @@ data:
   API_BASE_URL: 'http://api-service:8000'
   BASE_URL: 'http://links.local/'
   IS_IN_DOCKER: '1'
-  REDIS_URL: 'redis://redis-service:6379/0'

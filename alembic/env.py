@@ -36,8 +36,8 @@ target_metadata = Base.metadata
 
 database_url = settings.database_url
 
-print("Running in local mode. Replacing DB host for Alembic.")
-database_url = database_url.replace("db:5432", "localhost:5432")
+# print("Running in local mode. Replacing DB host for Alembic.")
+# database_url = database_url.replace("db:5432", "localhost:5432")
 
 config.set_main_option('sqlalchemy.url', database_url)
 

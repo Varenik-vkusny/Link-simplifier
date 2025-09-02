@@ -24,6 +24,17 @@ spec:
 
         image: postgres:17
 
+        startupProbe:
+          exec:
+            command:
+            - "sh"
+            - "-c"
+            - "PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'"
+
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+
         ports:
         - containerPort: 5432
 
@@ -48,7 +59,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: app-config
-              key: DB_NAME 
+              key: DB_NAME
 
   volumeClaimTemplates:
   - metadata:

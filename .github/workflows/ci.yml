@@ -39,8 +39,11 @@ jobs:
 
             - name: Create .env file for tests
               run: |
-                echo "DATABASE_URL=sqlite+aiosqlite:///:memory:" >> .env
-                echo "REDIS_URL=redis://localhost:6379/1" >> .env
+                echo "DB_DRIVER=sqlite+aiosqlite" >> .env
+                echo "DB_NAME=:memory:" >> .env
+                echo "REDIS_HOST=localhost" >> .env
+                echo "REDIS_PORT=6379" >> .env
+                echo "REDIS_DB=1" >> .env 
                 echo "ALGORITHM=HS256" >> .env
                 echo "SECRET_KEY=test_secret" >> .env
                 echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env

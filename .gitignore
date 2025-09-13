@@ -2,6 +2,10 @@
 .env
 .env.*
 
+# Не игнорировать secrets.yaml
+
+k8s/secrets.yaml
+
 # Не игнорировать файлы-примеры
 !*.env.example
 !*.env.*.example

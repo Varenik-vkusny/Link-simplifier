@@ -10,6 +10,9 @@ k8s/secrets.yaml
 !*.env.example
 !*.env.*.example
 
+# Игнорировать secrets.yaml
+k8s/secrets.yaml
+
 # Папка виртуального окружения
 venv/
 /venv/

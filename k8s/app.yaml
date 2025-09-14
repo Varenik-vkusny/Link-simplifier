@@ -19,7 +19,7 @@ spec:
       containers:
         - name: api-container
 
-          image: varenikvkusny/link-simplifier:1.3
+          image: varenikvkusny/link-simplifier:1.4
 
           ports:
             - containerPort: 8000
@@ -68,6 +68,9 @@ kind: Service
 metadata:
   name: api-service
   namespace: link-simplifier
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
 spec:
   selector:
     app: api

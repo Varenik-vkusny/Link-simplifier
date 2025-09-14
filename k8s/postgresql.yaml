@@ -2,87 +2,84 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
+  namespace: link-simplifier
 spec:
-
   replicas: 1
-  serviceName: 'postgres-service'
+  serviceName: "postgres-service"
 
   selector:
     matchLabels:
       app: postgres
-  
-  
-  template:
 
+  template:
     metadata:
       labels:
         app: postgres
 
     spec:
       containers:
-      - name: postgres-container
+        - name: postgres-container
 
-        image: postgres:17
+          image: postgres:17
 
-        startupProbe:
-          exec:
-            command:
-            - "sh"
-            - "-c"
-            - "PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'"
+          startupProbe:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - "PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'"
 
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 5
 
-        ports:
-        - containerPort: 5432
+          ports:
+            - containerPort: 5432
 
-        volumeMounts:
-        - name: postgres-mount
-          mountPath: /var/lib/postgresql/data
+          volumeMounts:
+            - name: postgres-mount
+              mountPath: /var/lib/postgresql/data
 
-        env:
-        - name: POSTGRES_USER
-          valueFrom: 
-            secretKeyRef:
-              name: app-secrets
-              key: DB_USER
-        
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: DB_PASSWORD
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_USER
 
-        - name: POSTGRES_DB
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_NAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_PASSWORD
+
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_NAME
 
   volumeClaimTemplates:
-  - metadata:
-      name: postgres-mount
+    - metadata:
+        name: postgres-mount
+        namespace: link-simplifier
+      spec:
+        accessModes: ["ReadWriteOnce"]
 
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-
-      resources:
-        requests:
-          storage: 1Gi
-
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
+  namespace: link-simplifier
 spec:
   selector:
     app: postgres
   ports:
-  - protocol: TCP
-    port: 5432
-    targetPort: 5432
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

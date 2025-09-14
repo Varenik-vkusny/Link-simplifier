@@ -2,17 +2,18 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
+  namespace: link-simplifier
 data:
-  DB_HOST: 'postgres-service'
-  DB_PORT: '5432'
-  DB_NAME: 'link_db'
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "link_db"
 
-  REDIS_HOST: 'redis-service'
-  REDIS_PORT: '6379'
-  REDIS_DB: '0'
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
 
-  ALGORITHM: 'HS256'
-  ACCESS_TOKEN_EXPIRE_MINUTES: '30'
-  API_BASE_URL: 'http://api-service:8000'
-  BASE_URL: 'http://links.local/'
-  IS_IN_DOCKER: '1'
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  API_BASE_URL: "http://api-service:8000"
+  BASE_URL: "http://links.local/"
+  IS_IN_DOCKER: "1"

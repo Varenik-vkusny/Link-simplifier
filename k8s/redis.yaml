@@ -2,52 +2,52 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis
+  namespace: link-simplifier
 spec:
-
   replicas: 1
-  serviceName: 'redis-service'
+  serviceName: "redis-service"
 
   selector:
     matchLabels:
       app: redis
-  
+
   template:
     metadata:
       labels:
         app: redis
     spec:
       containers:
-      - name: redis-container
+        - name: redis-container
 
-        image: redis:8-alpine
+          image: redis:8-alpine
 
-        ports:
-        - containerPort: 6379
+          ports:
+            - containerPort: 6379
 
-        volumeMounts:
-        - name: redis-mount
-          mountPath: /data
+          volumeMounts:
+            - name: redis-mount
+              mountPath: /data
 
   volumeClaimTemplates:
-  - metadata:
-      name: redis-mount
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
+    - metadata:
+        name: redis-mount
+      spec:
+        accessModes: ["ReadWriteOnce"]
 
-      resources:
-        requests:
-          storage: 1Gi
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
   name: redis-service
+  namespace: link-simplifier
 spec:
   selector:
     app: redis
   ports:
-  - protocol: TCP
-    port: 6379
-    targetPort: 6379
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

@@ -6,52 +6,53 @@ metadata:
 spec:
   template:
     spec:
-
       initContainers:
-      - name: check-db
+        - name: check-db
 
-        image: postgres:17
-        
-        command: ['sh', '-c', 
-                  'until pg_isready -h postgres-service -p 5432; 
-                  do echo "Waiting for PostgreSQL to be ready..."; 
-                  sleep 2; 
-                  done && echo "PostgreSQL is ready, waiting 5 seconds for stabilization..." && sleep 5']
+          image: postgres:17
+
+          command: [
+              "sh",
+              "-c",
+              'until pg_isready -h postgres-service -p 5432;
+              do echo "Waiting for PostgreSQL to be ready...";
+              sleep 2;
+              done && echo "PostgreSQL is ready, waiting 5 seconds for stabilization..." && sleep 5',
+            ]
 
       containers:
-      - name: migration-container
-        image: varenikvkusny/link-simplifier:1.3
-        command: ["alembic",  "upgrade", "head"]
+        - name: migration-container
+          image: varenikvkusny/link-simplifier:1.4
+          command: ["alembic", "upgrade", "head"]
 
-        envFrom:
+          envFrom:
+            - configMapRef:
+                name: app-config
 
-        - configMapRef:
-            name: app-config
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_USER
 
-        env:
-        - name: DB_USER
-          valueFrom: 
-            secretKeyRef:
-              name: app-secrets
-              key: DB_USER
-        
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: DB_PASSWORD
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_PASSWORD
 
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: SECRET_KEY
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SECRET_KEY
 
-        - name: BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: BOT_TOKEN
+            - name: BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: BOT_TOKEN
 
       restartPolicy: Never
 

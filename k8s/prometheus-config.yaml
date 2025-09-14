@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: link-simplifier
+data:
+  prometheus.yml: |
+    global:
+      - job_name: 'kubernetes-services'
+      kubernetes_sd_configs:
+        - role: service
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: 'keep'
+          regex: 'true'
+

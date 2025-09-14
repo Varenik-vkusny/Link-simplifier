@@ -45,6 +45,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus-service
+  namespace: link-simplifier
 spec:
   selector:
     app: prometheus

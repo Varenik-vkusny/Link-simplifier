@@ -2,7 +2,7 @@
 .env
 .env.*
 
-# Не игнорировать secrets.yaml
+# Игнорировать secrets.yaml
 
 k8s/secrets.yaml
 

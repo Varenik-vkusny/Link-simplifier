@@ -2,16 +2,9 @@
 .env
 .env.*
 
-# Игнорировать secrets.yaml
-
-k8s/secrets.yaml
-
 # Не игнорировать файлы-примеры
 !*.env.example
 !*.env.*.example
-
-# Игнорировать secrets.yaml
-k8s/secrets.yaml
 
 # Папка виртуального окружения
 venv/
@@ -38,3 +31,6 @@ __pycache__/
 .coverage
 htmlcov/
 .tox/
+# Kubernetes secrets
+k8s/secrets.yaml
+*secrets.yaml
